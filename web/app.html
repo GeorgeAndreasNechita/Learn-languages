@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Learn Spanish Words</title>
+    <title>Learn Words - Adaptive</title>
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <style>
       :root {
@@ -25,15 +25,12 @@
       }
 
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-family: "Segoe UI", system-ui, sans-serif;
         background-color: var(--bg-color);
         color: var(--text-color);
-        margin: 0 0.25vw;
-        padding: 2rem 1rem;
-        line-height: 1.6;
-        transition:
-          background-color 0.3s,
-          color 0.3s;
+        margin: 0;
+        padding: 1rem;
+        transition: background-color 0.3s;
       }
 
       .header-flex {
@@ -41,132 +38,237 @@
         justify-content: space-between;
         align-items: center;
         border-bottom: 2px solid var(--border-color);
-        margin-bottom: 20px;
         padding-bottom: 10px;
+        margin-bottom: 15px;
       }
 
-      #theme-toggle {
-        cursor: pointer;
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
         background: var(--header-bg);
-        border: 1px solid var(--border-color);
-        color: var(--text-color);
-        padding: 5px 10px;
+        padding: 12px;
+        border-radius: 8px;
+        align-items: center;
+      }
+
+      select {
+        padding: 8px;
         border-radius: 5px;
+        background: var(--row-bg);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        font-size: 0.9rem;
+      }
+
+      .swap-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 2rem;
+        color: var(--accent-color);
       }
 
       .table-row {
         display: grid;
-        text-align: center;
-        grid-template-columns: 2fr 1fr;
-        gap: 10px;
-        padding: 10px;
+        grid-template-columns: 1fr min-content;
+        gap: 15px;
+        padding: 12px;
         border-bottom: 1px solid var(--border-color);
         align-items: center;
         background-color: var(--row-bg);
       }
-
-      .tr-it {
-        color: #bb86fc;
-        font-weight: 600;
+      .words-parent {
+        text-align: center;
       }
 
-      .header {
-        font-weight: bold;
-        background-color: var(--header-bg);
-        border-radius: 5px 5px 0 0;
+      .word-src {
+        color: var(--accent-color);
+        font-weight: 600;
+      }
+      .word-target {
+        font-weight: 400;
       }
 
       .delete-btn {
         cursor: pointer;
         background: none;
         border: none;
-        font-size: 2rem;
+        font-size: 1.7rem;
         color: #ff4d4d;
+        opacity: 0.6;
+      }
+      .delete-btn:hover {
+        opacity: 1;
       }
 
-      .empty-msg {
+      .status {
         text-align: center;
-        color: #888;
-        margin-top: 20px;
-      }
-
-      .loading-msg {
-        text-align: center;
-        font-style: italic;
-        color: var(--accent-color);
+        padding: 10px;
+        font-weight: bold;
       }
     </style>
   </head>
   <body data-theme="dark">
     <div class="header-flex">
-      <h2>Learn Spanish Words</h2>
-      <button id="theme-toggle" onclick="toggleTheme()">🌓 Modus</button>
+      <h2 style="margin: 0">Vocab Trainer</h2>
+      <button
+        id="theme-toggle"
+        onclick="toggleTheme()"
+        style="
+          background: none;
+          border: 1px solid var(--border-color);
+          color: var(--text-color);
+          border-radius: 5px;
+          padding: 5px 10px;
+          cursor: pointer;
+        "
+      >
+        🌓
+      </button>
     </div>
 
-    <div id="vocabulary-list">
-      <div id="status-message"></div>
-      <div id="data-container"></div>
+    <div class="controls">
+      <select id="select-src" onchange="saveSettings()">
+        <option value="es">🇪🇸 Spanish</option>
+        <option value="de">🇩🇪 German</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="it">🇮🇹 Italian</option>
+        <option value="ro">🇷🇴 Romanian</option>
+      </select>
+
+      <button class="swap-btn" onclick="swapLanguages()">⇄</button>
+
+      <select id="select-target" onchange="saveSettings()">
+        <option value="es">🇪🇸 Spanish</option>
+        <option value="de">🇩🇪 German</option>
+        <option value="en">🇬🇧 English</option>
+        <option value="it">🇮🇹 Italian</option>
+        <option value="ro">🇷🇴 Romanian</option>
+      </select>
+
+      <select id="select-level" onchange="saveSettings()">
+        <option value="all">Alle Levels</option>
+        <option value="1">Lvl 1</option>
+        <option value="2">Lvl 2</option>
+        <option value="3">Coming soon...</option>
+      </select>
     </div>
+
+    <div id="instructions-message" class="instructions">
+      ${INSTRUCTIONS[targetLang] || "---"}
+    </div>
+    <div id="status-message" class="status"></div>
+    <div id="data-container"></div>
 
     <script>
-      // --- DEXIE LOGIK ---
-      const db = new Dexie("es-en");
+      // Datenbank initialisieren
+      const db = new Dexie("VocabularyDB");
       db.version(1).stores({
-        phrases: "++id, es, en, de, it, ro",
+        phrases: "++id, es, en, de, it, ro, level",
       });
 
       const JSON_URL =
         "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words-final.json";
 
-      async function initApp() {
-        const count = await db.phrases.count();
+      const INSTRUCTIONS = {
+        en: "These words are stored locally. If you delete browser data, they will be removed. The delete button removes a word from the database; once all words are deleted, the list will reset.",
+        es: "Estas palabras se guardan localmente. Si borras los datos del navegador, se eliminarán. El botón de borrar quita una palabra de la base de datos; cuando no quede ninguna, la lista se reiniciará.",
+        de: "Diese Wörter werden lokal gespeichert. Wenn Sie die Browserdaten löschen, werden sie entfernt. Der Lösch-Button entfernt ein Wort aus der Datenbank; wenn alle Wörter gelöscht sind, wird die Liste zurückgesetzt.",
+        it: "Queste parole sono memorizzate localmente. Se cancelli i dati del browser, verranno rimosse. Il pulsante elimina rimuove una parola dal database; quando tutte le parole saranno eliminate, l'elenco verrà ripristinato.",
+        ro: "Aceste cuvinte sunt stocate local. Dacă ștergeți datele browserului, acestea vor fi eliminate. Butonul de ștergere elimină un cuvânt din baza de date; după ce toate cuvintele sunt șterse, lista se va reseta.",
+      };
+      // 1. Einstellungen laden und speichern
+      function loadSettings() {
+        document.getElementById("select-src").value =
+          localStorage.getItem("vocab-src") || "es";
+        document.getElementById("select-target").value =
+          localStorage.getItem("vocab-target") || "de";
+        document.getElementById("select-level").value =
+          localStorage.getItem("vocab-level") || "all";
+      }
 
-        if (count === 0) {
-          const statusEl = document.getElementById("status-message");
-          statusEl.innerHTML =
-            '<p class="loading-msg">Lade Wörter vom Server...</p>';
-
-          try {
-            const response = await fetch(JSON_URL);
-            if (!response.ok) throw new Error("Netzwerk-Antwort war nicht ok");
-
-            const remotePhrases = await response.json();
-
-            // Falls das JSON ein Objekt mit einem Array ist (z.B. { "words": [...] })
-            // oder direkt ein Array. Hier gehen wir von einem Array aus:
-            await db.phrases.bulkAdd(remotePhrases);
-            statusEl.innerHTML = "";
-          } catch (error) {
-            console.error("Fehler beim Abrufen der Daten:", error);
-            statusEl.innerHTML =
-              '<p class="empty-msg" style="color: red;">Fehler beim Laden der externen Daten.</p>';
-          }
-        }
-
+      function saveSettings() {
+        localStorage.setItem(
+          "vocab-src",
+          document.getElementById("select-src").value,
+        );
+        localStorage.setItem(
+          "vocab-target",
+          document.getElementById("select-target").value,
+        );
+        localStorage.setItem(
+          "vocab-level",
+          document.getElementById("select-level").value,
+        );
         renderData();
       }
 
-      async function renderData() {
-        const container = document.getElementById("data-container");
-        let allPhrases = await db.phrases.toArray();
+      function swapLanguages() {
+        const src = document.getElementById("select-src");
+        const target = document.getElementById("select-target");
+        const temp = src.value;
+        src.value = target.value;
+        target.value = temp;
+        saveSettings();
+      }
 
-        if (allPhrases.length === 0) {
+      // 2. Datenbank-Initialisierung
+      async function initApp() {
+        loadSettings();
+        const count = await db.phrases.count();
+        if (count === 0) {
+          document.getElementById("status-message").innerHTML =
+            "Lade Daten von GitHub...";
+          try {
+            const response = await fetch(JSON_URL);
+            const data = await response.json();
+            await db.phrases.bulkAdd(data);
+            document.getElementById("status-message").innerHTML = "";
+          } catch (e) {
+            document.getElementById("status-message").innerHTML =
+              "Fehler beim Laden!";
+          }
+        }
+        renderData();
+      }
+
+      // 3. Anzeige-Logik
+      async function renderData() {
+        const srcLang = document.getElementById("select-src").value;
+        const targetLang = document.getElementById("select-target").value;
+        const levelFilter = document.getElementById("select-level").value;
+        const instructionsElem = document.getElementById(
+          "instructions-message",
+        );
+        if (instructionsElem) {
+          instructionsElem.textContent = INSTRUCTIONS[targetLang] || "---";
+        }
+        const container = document.getElementById("data-container");
+
+        let words = await db.phrases.toArray();
+
+        if (levelFilter !== "all") {
+          words = words.filter((w) => String(w.level) === levelFilter);
+        }
+        if (words.length === 0) {
           container.innerHTML =
-            '<p class="empty-msg">Keine Einträge gefunden.</p>';
+            '<p style="text-align:center; color: #888;">Keine Einträge für diesen Filter.</p>';
           return;
         }
 
-        container.innerHTML = allPhrases
+        container.innerHTML = words
           .map(
             (item) => `
-              <div class="table-row">
-                  <div>
-                    <div class="tr-it">${item.es || ""}</div>
-                    <div class="tr-de">${item.en || ""}</div>
-                  </div>
-                  <div><button class="delete-btn" onclick="deleteEntry(${item.id})" title="Löschen">🗑️</button></div>
-              </div>
-            `,
+          <div class="table-row">
+            <div class="words-parent">
+              <div class="word-src">${item[srcLang] || "---"}</div>
+              <div class="word-target">${item[targetLang] || "---"}</div>
+            </div>
+            <button class="delete-btn" onclick="deleteEntry(${item.id})">🗑️</button>
+          </div>
+        `,
           )
           .join("");
       }
@@ -178,9 +280,10 @@
 
       function toggleTheme() {
         const body = document.body;
-        const currentTheme = body.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        body.setAttribute("data-theme", newTheme);
+        body.setAttribute(
+          "data-theme",
+          body.getAttribute("data-theme") === "dark" ? "light" : "dark",
+        );
       }
 
       initApp();
