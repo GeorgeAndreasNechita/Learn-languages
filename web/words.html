@@ -31,7 +31,9 @@
         margin: 0 0.25vw;
         padding: 2rem 1rem;
         line-height: 1.6;
-        transition: background-color 0.3s, color 0.3s;
+        transition:
+          background-color 0.3s,
+          color 0.3s;
       }
 
       .header-flex {
@@ -54,8 +56,8 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 1fr 1fr auto;
         text-align: center;
+        grid-template-columns: 2fr 1fr;
         gap: 10px;
         padding: 10px;
         border-bottom: 1px solid var(--border-color);
@@ -78,7 +80,7 @@
         cursor: pointer;
         background: none;
         border: none;
-        font-size: 1.2rem;
+        font-size: 2rem;
         color: #ff4d4d;
       }
 
@@ -87,7 +89,7 @@
         color: #888;
         margin-top: 20px;
       }
-      
+
       .loading-msg {
         text-align: center;
         font-style: italic;
@@ -113,31 +115,34 @@
         phrases: "++id, es, en, de, it, ro",
       });
 
-      const JSON_URL = "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words-final.json";
+      const JSON_URL =
+        "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words-final.json";
 
       async function initApp() {
         const count = await db.phrases.count();
-        
+
         if (count === 0) {
           const statusEl = document.getElementById("status-message");
-          statusEl.innerHTML = '<p class="loading-msg">Lade Wörter vom Server...</p>';
-          
+          statusEl.innerHTML =
+            '<p class="loading-msg">Lade Wörter vom Server...</p>';
+
           try {
             const response = await fetch(JSON_URL);
             if (!response.ok) throw new Error("Netzwerk-Antwort war nicht ok");
-            
+
             const remotePhrases = await response.json();
-            
+
             // Falls das JSON ein Objekt mit einem Array ist (z.B. { "words": [...] })
             // oder direkt ein Array. Hier gehen wir von einem Array aus:
             await db.phrases.bulkAdd(remotePhrases);
-            statusEl.innerHTML = ""; 
+            statusEl.innerHTML = "";
           } catch (error) {
             console.error("Fehler beim Abrufen der Daten:", error);
-            statusEl.innerHTML = '<p class="empty-msg" style="color: red;">Fehler beim Laden der externen Daten.</p>';
+            statusEl.innerHTML =
+              '<p class="empty-msg" style="color: red;">Fehler beim Laden der externen Daten.</p>';
           }
         }
-        
+
         renderData();
       }
 
@@ -146,7 +151,8 @@
         let allPhrases = await db.phrases.toArray();
 
         if (allPhrases.length === 0) {
-          container.innerHTML = '<p class="empty-msg">Keine Einträge gefunden.</p>';
+          container.innerHTML =
+            '<p class="empty-msg">Keine Einträge gefunden.</p>';
           return;
         }
 
@@ -154,11 +160,13 @@
           .map(
             (item) => `
               <div class="table-row">
-                  <div class="tr-it">${item.es || ''}</div>
-                  <div class="tr-de">${item.en || ''}</div>
+                  <div>
+                    <div class="tr-it">${item.es || ""}</div>
+                    <div class="tr-de">${item.en || ""}</div>
+                  </div>
                   <div><button class="delete-btn" onclick="deleteEntry(${item.id})" title="Löschen">🗑️</button></div>
               </div>
-            `
+            `,
           )
           .join("");
       }
