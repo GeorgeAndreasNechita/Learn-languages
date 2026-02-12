@@ -4,9 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Learn Words - Alpine.js</title>
-    
+
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
 
     <style>
       :root {
@@ -112,10 +115,10 @@
       }
 
       .instructions {
-          padding: 10px;
-          font-style: italic;
-          font-size: 0.9rem;
-          opacity: 0.8;
+        padding: 10px;
+        font-style: italic;
+        font-size: 0.9rem;
+        opacity: 0.8;
       }
     </style>
   </head>
@@ -165,9 +168,9 @@
     </div>
 
     <div class="instructions" x-text="instructions[targetLang] || '---'"></div>
-    
+
     <div x-show="loading" class="status">Lade Daten von GitHub...</div>
-    
+
     <div id="data-container">
       <template x-for="item in filteredWords" :key="item.id">
         <div class="table-row">
@@ -180,23 +183,27 @@
       </template>
 
       <template x-if="filteredWords.length === 0 && !loading">
-        <p style="text-align:center; color: #888;">Keine Einträge für diesen Filter.</p>
+        <p
+          style="text-align: center; color: #888"
+          x-text="noEntries[targetLang]"
+        ></p>
       </template>
     </div>
 
     <script>
-      const JSON_URL = "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words-final.json";
+      const JSON_URL =
+        "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words-final.json";
 
-      document.addEventListener('alpine:init', () => {
-        Alpine.data('vocabApp', () => ({
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("vocabApp", () => ({
           db: null,
           words: [],
           loading: false,
-          theme: localStorage.getItem('vocab-theme') || 'dark',
-          srcLang: localStorage.getItem('vocab-src') || 'es',
-          targetLang: localStorage.getItem('vocab-target') || 'de',
-          levelFilter: localStorage.getItem('vocab-level') || 'all',
-          
+          theme: localStorage.getItem("vocab-theme") || "dark",
+          srcLang: localStorage.getItem("vocab-src") || "es",
+          targetLang: localStorage.getItem("vocab-target") || "de",
+          levelFilter: localStorage.getItem("vocab-level") || "all",
+
           instructions: {
             en: "These words are stored locally. If you delete browser data, they will be removed. The delete button removes a word from the database; once all words are deleted, the list will reset.",
             es: "Estas palabras se guardan localmente. Si borras los datos del navegador, se eliminarán. El botón de borrar quita una palabra de la base de datos; cuando no quede ninguna, la lista se reiniciará.",
@@ -204,10 +211,18 @@
             it: "Queste parole sono memorizzate localmente. Se cancelli i dati del browser, verranno rimosse. Il pulsante elimina rimuove una parola dal database; quando tutte le parole saranno eliminate, l'elenco verrà ripristinato.",
             ro: "Aceste cuvinte sunt stocate local. Dacă ștergeți datele browserului, acestea vor fi eliminate. Butonul de ștergere elimină un cuvânt din baza de date; după ce toate cuvintele sunt șterse, lista se va reseta.",
           },
+          noEntries: {
+            en: "No entries found for this filter.",
+            es: "No se encontraron entradas para este filtro.",
+            de: "Keine Einträge für diesen Filter.",
+            it: "Nessuna voce trovata für questo filtro.",
+            ro: "Nu s-au găsit intrări pentru acest filtru.",
+          },
 
           async init() {
             // Dexie Init
             this.db = new Dexie("VocabularyDB");
+            // await db.phrases.clear();
             this.db.version(1).stores({
               phrases: "++id, es, en, de, it, ro, level",
             });
@@ -233,8 +248,10 @@
           },
 
           get filteredWords() {
-            if (this.levelFilter === 'all') return this.words;
-            return this.words.filter(w => String(w.level) === this.levelFilter);
+            if (this.levelFilter === "all") return this.words;
+            return this.words.filter(
+              (w) => String(w.level) === this.levelFilter,
+            );
           },
 
           saveSettings() {
@@ -253,14 +270,14 @@
             await this.loadFromDB();
             // Wenn alles leer ist, neu laden (wie in deinem Original-Konzept angedeutet)
             if (this.words.length === 0) {
-                this.init();
+              this.init();
             }
           },
 
           toggleTheme() {
-            this.theme = this.theme === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('vocab-theme', this.theme);
-          }
+            this.theme = this.theme === "dark" ? "light" : "dark";
+            localStorage.setItem("vocab-theme", this.theme);
+          },
         }));
       });
     </script>
