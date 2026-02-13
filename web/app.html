@@ -78,7 +78,7 @@
 
       .table-row {
         display: grid;
-        grid-template-columns: 1fr min-content;
+        text-align: center;
         gap: 15px;
         padding: 12px;
         border-bottom: 1px solid var(--border-color);
@@ -175,10 +175,8 @@
     <div id="data-container">
       <template x-for="item in filteredWords" :key="item.id">
         <div class="table-row">
-          <div class="words-parent">
-            <div class="word-src" x-text="item[srcLang] || '---'"></div>
-            <div class="word-target" x-text="item[targetLang] || '---'"></div>
-          </div>
+          <div class="word-src" x-text="item[srcLang] || '---'"></div>
+          <div class="word-target" x-text="item[targetLang] || '---'"></div>
           <button class="delete-btn" @click="deleteEntry(item.id)">🗑️</button>
         </div>
       </template>
@@ -193,7 +191,7 @@
 
     <script>
       const JSON_URL =
-        "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words-final.json";
+        "https://raw.githubusercontent.com/GeorgeAndreasNechita/Learn-languages/refs/heads/main/web/words_test.json";
 
       document.addEventListener("alpine:init", () => {
         Alpine.data("vocabApp", () => ({
