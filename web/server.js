@@ -5,12 +5,16 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
-// Middleware
 app.use(express.json());
 
 const API_KEY = process.env.API_KEY || "supersecretkey";
 
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Server läuft!" });
+});
+
 function checkApiKey(req, res, next) {
+  next()
   const key = req.headers["x-api-key"];
   if (key !== API_KEY) {
     return res.status(403).json({ error: "Forbidden" });
