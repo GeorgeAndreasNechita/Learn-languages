@@ -1,4 +1,6 @@
-[{"es":"de", "en":"of", "de":"von", "it":"di", "ro":"de", "level": "1"},
+{
+    "version": 1,
+    "words":[{"es":"de", "en":"of", "de":"von", "it":"di", "ro":"de", "level": "1"},
 {"es":"que", "en":"that", "de":"dass", "it":"che", "ro":"că", "level": "1"},
 {"es":"no", "en":"no", "de":"nein", "it":"no", "ro":"nu", "level": "1"},
 {"es":"a", "en":"to", "de":"zu", "it":"a", "ro":"la", "level": "1"},
@@ -1695,5 +1697,5 @@
   {"es":"un libro muy viejo", "en":"a very old book", "de":"ein sehr altes Buch", "it":"un libro molto vecchio", "ro":"o carte foarte veche", "level":"4"},
   {"es":"el mar es azul", "en":"the sea is blue", "de":"das Meer ist blau", "it":"il mare è blu", "ro":"marea este albastră", "level":"4"},
   {"es":"esto no es justo", "en":"this is not fair", "de":"das ist nicht fair", "it":"questo non è giusto", "ro":"asta nu este drept", "level":"4"},
-  {"es":"el sol se va", "en":"the sun goes away", "de":"die Sonne geht weg", "it":"il sole se ne-va", "ro":"soarele apune acum", "level":"4"}
-]
+  {"es":"el sol se va", "en":"the sun goes away", "de":"die Sonne geht weg", "it":"il sole se ne-va", "ro":"soarele apune acum", "level":"4"}]
+}
