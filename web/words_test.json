@@ -1,2 +1,5 @@
-[{"es":"de", "en":"of", "de":"von", "it":"di", "ro":"de", "level": "1"}
-]
+{  
+  "version": 2,
+  "words":[{"es":"de", "en":"of", "de":"von", "it":"di", "ro":"de", "level": "1", "read": false}]
+}
+
