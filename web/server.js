@@ -10,7 +10,7 @@ app.use(express.json());
 const API_KEY = process.env.API_KEY || "supersecretkey";
 
 app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "Server läuft!" });
+  res.json({ status: "ok", message: "Server läuft1111!" });
 });
 
 function checkApiKey(req, res, next) {

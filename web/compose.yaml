@@ -11,5 +11,6 @@ services:
     volumes:
       - ./:/app:Z
       - /app/node_modules
+    command: npx nodemon --legacy-watch server.js
     environment:
       - API_KEY=supersecretkey
